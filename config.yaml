@@ -2,52 +2,55 @@
 
 # Directory Configuration
 # -----------------------
+# Note: The input directory can contain FASTQ, BAM, or CRAM files.
+# When running submit_wgs.sh, you'll be prompted to select the input format:
+#   1) FASTQ files (*.fastq.gz) - Full pipeline from alignment to VCF
+#   2) BAM files (*.bam) - Skip alignment, process from dedup to VCF
+#   3) CRAM files (*.cram) - Convert to BAM first, then process to VCF
 directories:
-  # Input directory containing cleaned FASTQ files (*_1.clean.fastq.gz, *_2.clean.fastq.gz)
-  input: "/kcdh/tanmoy.roychowdhury/piplines/wes/wes_input"
+  # Input directory containing cleaned FASTQ/BAM/CRAM files
+  input: "/kcdh/tanmoy.roychowdhury/piplines/wgs/wgs_input"
 
   # Output directory for final results (CRAM, VCF, logs)
-  output: "/kcdh/tanmoy.roychowdhury/piplines/wes/wes_output"
+  output: "/kcdh/tanmoy.roychowdhury/piplines/wgs/wgs_output"
 
   # Temporary directory for intermediate files (will be cleaned up)
-  temp: "/kcdh/tanmoy.roychowdhury/piplines/wes/temp"
+  temp: "/kcdh/tanmoy.roychowdhury/piplines/wgs/temp"
 
   # Backup directory for previous run data (cram, vcf, logs, qc_stats, reference)
-  backup: "/kcdh/tanmoy.roychowdhury/piplines/wes/backup"
+  backup: "/kcdh/tanmoy.roychowdhury/piplines/wgs/backup"
 
   # Scripts directory (where pipeline scripts are run from)
-  scripts: "/kcdh/tanmoy.roychowdhury/piplines/wes/scripts"
+  scripts: "/kcdh/tanmoy.roychowdhury/piplines/wgs/scripts"
 
 # Project Settings
 # ----------------
 project:
   # Project name for output folder naming (e.g., copd, diabetes, cardiac)
-  # Folders will be named: logs_YYYYMMDD_wes_copd, cram_YYYYMMDD_wes_copd, etc.
+  # Folders will be named: logs_YYYYMMDD_wgs_copd, cram_YYYYMMDD_wgs_copd, etc.
   name: "copd"
 
 # Processing Parameters
 # ---------------------
 processing:
-  # Number of samples to process simultaneously
-  batch_size: 5
+  # Number of samples to process simultaneously (9 nodes available)
+  batch_size: 9
 
-  # Number of CPU threads to use
-  threads: 16
+  # Number of CPU threads to use (compute9 has 104 CPUs, using 80)
+  threads: 80
 
-  # Memory allocation (in GB)
-  memory_gb: 32
+  # Memory allocation (in GB) (compute9 has 131GB, using 100GB)
+  memory_gb: 100
 
   # JVM memory for Java tools (in GB, should be ~90% of total memory)
-  jvm_memory_gb: 28
+  jvm_memory_gb: 90
 
 # Reference Genome
 # ----------------
 reference:
   # Main reference FASTA file
   fasta: "/kcdh/tanmoy.roychowdhury/reference/fasta/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa"
-
-  # WES capture regions BED file
-  bed: "/kcdh/tanmoy.roychowdhury/reference/exome_bed/twist_exome2.0_bed/hg38_exome_v2.0.2_targets_sorted_validated.re_annotated.bed"
+  # WGS: No BED file needed - processes full genome (all autosomes + sex chromosomes)
 
 # Known Sites for BQSR
 # --------------------
@@ -96,7 +99,7 @@ bwa:
 # Picard Parameters
 # -----------------
 picard:
-  max_records_in_ram: 2000000
+  max_records_in_ram: 5000000
   validation_stringency: "SILENT"
   use_threading: true
 
