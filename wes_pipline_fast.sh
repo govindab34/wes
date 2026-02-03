@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #PBS -N wes_pipeline_fast
 #PBS -q cpu
-#PBS -l select=1:ncpus=64:mem=128gb
-#PBS -l walltime=12:00:00
+#PBS -l select=1:ncpus=100:mem=100gb
+#PBS -l walltime=08:00:00
 
 ################################################################################
 # WES Pipeline - Configurable Batch Processing

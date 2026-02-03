@@ -29,16 +29,16 @@ project:
 # ---------------------
 processing:
   # Number of samples to process simultaneously (FAST MODE: increased)
-  batch_size: 10
+  batch_size: 15
 
-  # Number of CPU threads to use (FAST MODE: 64 cores)
-  threads: 64
+  # Number of CPU threads to use (FAST MODE: 100 cores - max for your nodes)
+  threads: 100
 
-  # Memory allocation (in GB) (FAST MODE: 128GB)
-  memory_gb: 128
+  # Memory allocation (in GB) (FAST MODE: 100GB)
+  memory_gb: 100
 
   # JVM memory for Java tools (in GB, should be ~90% of total memory)
-  jvm_memory_gb: 120
+  jvm_memory_gb: 90
 
 # Reference Genome
 # ----------------
