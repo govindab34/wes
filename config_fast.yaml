@@ -1,0 +1,160 @@
+# ================================
+
+# Directory Configuration
+# -----------------------
+directories:
+  # Input directory containing cleaned FASTQ files (*_1.clean.fastq.gz, *_2.clean.fastq.gz)
+  input: "/kcdh/tanmoy.roychowdhury/piplines/wes/wes_input"
+
+  # Output directory for final results (CRAM, VCF, logs)
+  output: "/kcdh/tanmoy.roychowdhury/piplines/wes/wes_output"
+
+  # Temporary directory for intermediate files (will be cleaned up)
+  temp: "/kcdh/tanmoy.roychowdhury/piplines/wes/temp"
+
+  # Backup directory for previous run data (cram, vcf, logs, qc_stats, reference)
+  backup: "/kcdh/tanmoy.roychowdhury/piplines/wes/backup"
+
+  # Scripts directory (where pipeline scripts are run from)
+  scripts: "/kcdh/tanmoy.roychowdhury/piplines/wes/scripts"
+
+# Project Settings
+# ----------------
+project:
+  # Project name for output folder naming (e.g., copd, diabetes, cardiac)
+  # Folders will be named: logs_YYYYMMDD_wes_copd, cram_YYYYMMDD_wes_copd, etc.
+  name: "copd"
+
+# Processing Parameters
+# ---------------------
+processing:
+  # Number of samples to process simultaneously (FAST MODE: increased)
+  batch_size: 10
+
+  # Number of CPU threads to use (FAST MODE: 64 cores)
+  threads: 64
+
+  # Memory allocation (in GB) (FAST MODE: 128GB)
+  memory_gb: 128
+
+  # JVM memory for Java tools (in GB, should be ~90% of total memory)
+  jvm_memory_gb: 120
+
+# Reference Genome
+# ----------------
+reference:
+  # Main reference FASTA file
+  fasta: "/kcdh/tanmoy.roychowdhury/reference/fasta/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa"
+
+  # WES capture regions BED file
+  bed: "/kcdh/tanmoy.roychowdhury/reference/exome_bed/twist_exome2.0_bed/hg38_exome_v2.0.2_targets_sorted_validated.re_annotated.bed"
+
+# Known Sites for BQSR
+# --------------------
+known_sites:
+  snps: "/kcdh/tanmoy.roychowdhury/reference/bqsr_files/Homo_sapiens_assembly38.dbsnp138.vcf.gz"
+  indels: "/kcdh/tanmoy.roychowdhury/reference/bqsr_files/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
+
+# VQSR Resources
+# --------------
+vqsr_resources:
+  hapmap: "/kcdh/tanmoy.roychowdhury/reference/vqsr_files/hapmap_3.3.hg38.vcf.gz"
+  omni: "/kcdh/tanmoy.roychowdhury/reference/vqsr_files/1000G_omni2.5.hg38.vcf.gz"
+  kg_snps: "/kcdh/tanmoy.roychowdhury/reference/vqsr_files/1000G_phase1.snps.high_confidence.hg38.vcf.gz"
+  dbsnp: "/kcdh/tanmoy.roychowdhury/reference/bqsr_files/Homo_sapiens_assembly38.dbsnp138.vcf.gz"
+  mills: "/kcdh/tanmoy.roychowdhury/reference/bqsr_files/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
+
+# Tool Paths
+# ----------
+tools:
+  # BWA path (will be added to PATH)
+  bwa: "/home/spack/spack/opt/spack/linux-centos7-cascadelake/gcc-11.2.0/bwa-0.7.17-zjkmbftvaybsp7nqdyouocdsdyqdzifq/bin"
+
+  # Samtools path (will be added to PATH)
+  samtools: "/apps/spack/opt/spack/linux-centos7-cascadelake/gcc-13.2.0/samtools-1.19.2-kteb63sy3jaqsrxgiynhz2uty5hhb5sh/bin"
+
+  # Java executable
+  java: "/apps/spack/opt/spack/linux-centos7-cascadelake/gcc-13.2.0/openjdk-17.0.8.1_1-26ukvn3nkknolj3jk7msxad57rrobdw2/bin/java"
+
+  # Picard JAR file
+  picard: "/apps/spack/opt/spack/linux-centos7-cascadelake/gcc-13.2.0/picard-3.1.1-*/bin/picard.jar"
+
+  # GATK JAR file
+  gatk: "/apps/spack/opt/spack/linux-centos7-cascadelake/gcc-13.2.0/gatk-4.5.0.0-4nhwx2jgosen57dtyoluc5staoxrbwnq/bin/gatk-package-4.5.0.0-local.jar"
+
+  # Spack setup script
+  spack_setup: "/apps/spack/share/spack/setup-env.sh"
+
+# BWA Alignment Parameters
+# -------------------------
+# -Y flag enables soft clipping for supplementary alignments
+# -K parameter sets chunk size (FAST MODE: 100M for better performance)
+bwa:
+  use_soft_clipping: true
+  chunk_size: 100000000
+
+# Picard Parameters
+# -----------------
+picard:
+  max_records_in_ram: 5000000 # FAST MODE: increased for better performance
+  validation_stringency: "SILENT"
+  use_threading: true
+
+# GATK BQSR Parameters
+# --------------------
+bqsr:
+  preserve_qscores_less_than: 6
+  downsample_fraction: 0.1
+  static_quantized_quals: [10, 20, 30]
+
+# GATK HaplotypeCaller Parameters
+# --------------------------------
+haplotype_caller:
+  emit_ref_confidence: "GVCF"
+  annotations:
+    - "AlleleFraction"
+    - "DepthPerAlleleBySample"
+    - "Coverage"
+    - "FisherStrand"
+    - "MappingQualityRankSumTest"
+    - "QualByDepth"
+    - "ReadPosRankSumTest"
+    - "RMSMappingQuality"
+    - "StrandOddsRatio"
+    - "InbreedingCoeff"
+
+# VQSR Parameters
+# ---------------
+vqsr:
+  snp:
+    truth_sensitivity: 99.80
+    tranches: [100.0, 99.8, 99.6, 99.4, 99.2, 99.0, 95.0, 90.0]
+    annotations: ["QD", "MQ", "FS", "MQRankSum", "ReadPosRankSum", "SOR"]
+
+  indel:
+    truth_sensitivity: 99.0
+    tranches: [100.0, 99.0, 95.0, 92.0, 90.0]
+    annotations: ["QD", "FS", "ReadPosRankSum", "MQRankSum", "SOR"]
+    max_gaussians: 4
+
+# PBS Job Parameters
+# ------------------
+pbs:
+  queue: "cpu"
+  walltime: "24:00:00"
+  # ncpus and mem will be taken from processing section
+
+# Cleanup Configuration
+# ---------------------
+cleanup:
+  # Delete temp folder after successful completion
+  delete_temp_on_success: true
+
+  # Keep these intermediate files (relative to temp dir)
+  keep_files:
+    - "*.g.vcf.gz" # Keep GVCFs for joint calling
+    - "*.g.vcf.gz.tbi" # Keep GVCF indices
+
+  # Delete these specific patterns immediately after use
+  immediate_delete:
+    - "*_fixedmate.bam"
